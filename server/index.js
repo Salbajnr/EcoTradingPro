@@ -39,47 +39,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cryptotra
   useUnifiedTopology: true,
 })
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  balance: { type: Number, default: 10000 }, // Virtual balance
-  portfolio: { type: Object, default: {} },
-  trades: [{ type: Object }],
-  createdAt: { type: Date, default: Date.now }
-})
-
-// Admin Schema
-const adminSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-})
-
-// News Schema
-const newsSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  author: { type: String, default: 'CryptoTrade Pro' },
-  publishedAt: { type: Date, default: Date.now },
-  category: { type: String, default: 'General' }
-})
-
-// Announcement Schema
-const announcementSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  type: { type: String, enum: ['info', 'warning', 'success'], default: 'info' },
-  active: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now }
-})
-
-const User = mongoose.model('User', userSchema)
-const Admin = mongoose.model('Admin', adminSchema)
-const News = mongoose.model('News', newsSchema)
-const Announcement = mongoose.model('Announcement', announcementSchema)
+// Import Models
+const User = require('./models/User')
+const Admin = require('./models/Admin')
+const News = require('./models/News')
+const Announcement = require('./models/Announcement')
 
 // JWT Middleware
 const authenticateToken = (req, res, next) => {
