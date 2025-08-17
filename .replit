@@ -1,0 +1,7 @@
+modules = ["web", "dotnet-10.0", "gcloud", "nix", "postgresql-17", "svelte-kit-node-20", "typescript-language-server"]
+run = "npm run dev"
+[nix]
+channel = "stable-25_05"
+
+[deployment]
+run = ["sh", "-c", "npm run dev"]
