@@ -4,6 +4,35 @@
 @tailwind utilities;
 
 :root {
+  --primary: #5D5CDE;
+  --primary-dark: #4A49C4;
+}
+
+.primary {
+  color: var(--primary);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.from-primary {
+  --tw-gradient-from: var(--primary);
+}
+
+.to-primary {
+  --tw-gradient-to: var(--primary);
+}
+
+:root {
   color-scheme: light dark;
 }
 

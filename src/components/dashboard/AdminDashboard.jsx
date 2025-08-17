@@ -11,10 +11,16 @@ function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [newBalance, setNewBalance] = useState('')
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('users')
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
     fetchUsers()
+    // Update stats periodically
+    const interval = setInterval(() => {
+      updateStats()
+    }, 10000)
+    return () => clearInterval(interval)
   }, [])
 
   const fetchUsers = async () => {
@@ -40,205 +46,398 @@ function AdminDashboard() {
     }
   }
 
+  const updateStats = () => {
+    // Simulate real-time updates for demo purposes
+    // In production, this would fetch real data
+  }
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed)
+  }
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to sign out of your admin session?')) {
+      logout()
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A0F1A]">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <svg className="w-8 h-8" viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="32" r="28" fill="#10B981" opacity=".14"/>
-                <path d="M16 34c8-6 14-14 16-24 2 10 8 18 16 24-8 6-14 14-16 24-2-10-8-18-16-24z" fill="#0A84FF"/>
-              </svg>
-              <span className="text-xl font-extrabold">
-                <span className="text-emerald-500">ADMIN</span> <span className="text-brand-500">PANEL</span>
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                {theme === 'dark' ? '☀️' : '🌙'}
-              </button>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Admin: {user?.name}
-                </span>
-                <button
-                  onClick={logout}
-                  className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="bg-gray-900 text-white overflow-x-hidden min-h-screen">
+      {/* Animated Background */}
+      <div className="fixed inset-0 opacity-20 pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(93, 92, 222, 0.1) 1px, transparent 0)',
+        backgroundSize: '20px 20px'
+      }}></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-600/5 pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'users'
-                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                User Management
-              </button>
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'analytics'
-                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                Analytics
-              </button>
-            </nav>
+      {/* Sidebar */}
+      <div 
+        className={`fixed left-0 top-0 h-screen ${sidebarCollapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-r border-gray-700/50 transform transition-all duration-300 z-40`}
+      >
+        {/* Logo Section */}
+        <div className="p-6 border-b border-gray-700/50">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-purple-600 rounded-xl flex items-center justify-center animate-pulse">
+              <span className="text-white font-bold text-lg">₿</span>
+            </div>
+            {!sidebarCollapsed && (
+              <div>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Eco Trading Pro</h2>
+                <p className="text-xs text-gray-400">Admin Portal</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {activeTab === 'users' && (
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold">User Management</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Manage user accounts and balances
-              </p>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Balance
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Joined
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {users.map((user) => (
-                    <tr key={user._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {user.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {user.email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          ${user.balance?.toLocaleString() || '0'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.isActive 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {user.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => setSelectedUser(user)}
-                          className="text-emerald-600 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-300"
-                        >
-                          Edit Balance
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {/* Navigation */}
+        <nav className="mt-6 px-3">
+          <div className="space-y-2">
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === 'dashboard' 
+                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                  : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              <span className="text-xl mr-4">🏠</span>
+              {!sidebarCollapsed && <span className="font-medium">Dashboard</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab('users')}
+              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === 'users' 
+                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                  : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              <span className="text-xl mr-4">👥</span>
+              {!sidebarCollapsed && <span className="font-medium">User Management</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab('balance')}
+              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === 'balance' 
+                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                  : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              <span className="text-xl mr-4">💰</span>
+              {!sidebarCollapsed && <span className="font-medium">Balance Control</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab('analytics')}
+              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === 'analytics' 
+                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                  : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              <span className="text-xl mr-4">📊</span>
+              {!sidebarCollapsed && <span className="font-medium">Analytics</span>}
+            </button>
+            <button className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+              <span className="text-xl mr-4">📰</span>
+              {!sidebarCollapsed && <span className="font-medium">News Manager</span>}
+            </button>
+            <button className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+              <span className="text-xl mr-4">🔔</span>
+              {!sidebarCollapsed && <span className="font-medium">Notifications</span>}
+            </button>
+            <button className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+              <span className="text-xl mr-4">⚙️</span>
+              {!sidebarCollapsed && <span className="font-medium">Settings</span>}
+            </button>
           </div>
-        )}
+        </nav>
 
-        {activeTab === 'analytics' && (
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Platform Analytics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-blue-700 dark:text-blue-400">Total Users</h3>
-                <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">{users.length}</p>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-green-700 dark:text-green-400">Active Users</h3>
-                <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                  {users.filter(u => u.isActive).length}
-                </p>
-              </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-purple-700 dark:text-purple-400">Total Balance</h3>
-                <p className="text-2xl font-bold text-purple-900 dark:text-purple-300">
-                  ${users.reduce((sum, user) => sum + (user.balance || 0), 0).toLocaleString()}
-                </p>
+        {/* Admin Status */}
+        {!sidebarCollapsed && (
+          <div className="absolute bottom-6 left-3 right-3">
+            <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                  <span className="text-white text-sm">👤</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{user?.name || 'Admin User'}</p>
+                  <p className="text-xs text-green-400 flex items-center">
+                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                    Online
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
       </div>
 
+      {/* Main Content */}
+      <div className={`${sidebarCollapsed ? 'ml-20' : 'ml-64'} transition-all duration-300`}>
+        {/* Top Bar */}
+        <header className="backdrop-filter backdrop-blur-lg bg-white/5 border-b border-gray-700/50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button onClick={toggleSidebar} className="p-2 rounded-xl hover:bg-gray-700/50 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  Welcome back, Admin
+                </h1>
+                <p className="text-gray-400 text-sm">Monitor and manage your crypto simulation platform</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl hover:bg-gray-700/50 transition-colors"
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+
+              {/* Real-time indicator */}
+              <div className="flex items-center space-x-2 px-3 py-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm font-medium">Live</span>
+              </div>
+              
+              {/* Notifications */}
+              <button className="relative p-2 rounded-xl hover:bg-gray-700/50 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5z"></path>
+                </svg>
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">3</div>
+              </button>
+              
+              {/* Logout */}
+              <button 
+                onClick={handleLogout}
+                className="px-6 py-2 bg-gradient-to-r from-primary to-purple-600 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 font-medium"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Dashboard Content */}
+        <main className="p-6">
+          {activeTab === 'dashboard' && (
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {/* Total Users */}
+                <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 hover:transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">👥</span>
+                    </div>
+                    <div className="text-green-400 text-sm font-medium flex items-center">
+                      <span className="mr-1">↗</span> +12%
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">{users.length}</h3>
+                  <p className="text-gray-400 text-sm">Total Users</p>
+                  <div className="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full animate-pulse" style={{width: '78%'}}></div>
+                  </div>
+                </div>
+
+                {/* Active Traders */}
+                <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 hover:transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">📈</span>
+                    </div>
+                    <div className="text-green-400 text-sm font-medium flex items-center">
+                      <span className="mr-1">↗</span> +8%
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">{users.filter(u => u.isActive).length}</h3>
+                  <p className="text-gray-400 text-sm">Active Traders</p>
+                  <div className="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full animate-pulse" style={{width: '65%'}}></div>
+                  </div>
+                </div>
+
+                {/* Total Volume */}
+                <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 hover:transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">💰</span>
+                    </div>
+                    <div className="text-green-400 text-sm font-medium flex items-center">
+                      <span className="mr-1">↗</span> +23%
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">${users.reduce((sum, user) => sum + (user.balance || 0), 0).toLocaleString()}</h3>
+                  <p className="text-gray-400 text-sm">Simulated Volume</p>
+                  <div className="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full animate-pulse" style={{width: '89%'}}></div>
+                  </div>
+                </div>
+
+                {/* Platform Health */}
+                <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 hover:transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <div className="text-green-400 text-sm font-medium flex items-center">
+                      <span className="mr-1">✓</span> Healthy
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">99.9%</h3>
+                  <p className="text-gray-400 text-sm">System Uptime</p>
+                  <div className="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full animate-pulse" style={{width: '99%'}}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                <button 
+                  onClick={() => setActiveTab('balance')}
+                  className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center"
+                >
+                  <span className="text-2xl mr-3">💰</span>
+                  <span className="font-medium">Simulate Balance</span>
+                </button>
+                <button className="w-full p-6 bg-gradient-to-r from-green-600 to-green-500 rounded-xl hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 flex items-center justify-center">
+                  <span className="text-2xl mr-3">📢</span>
+                  <span className="font-medium">Send Announcement</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('users')}
+                  className="w-full p-6 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 flex items-center justify-center"
+                >
+                  <span className="text-2xl mr-3">👥</span>
+                  <span className="font-medium">Manage Users</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('analytics')}
+                  className="w-full p-6 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300 flex items-center justify-center"
+                >
+                  <span className="text-2xl mr-3">📊</span>
+                  <span className="font-medium">View Reports</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">User Management</h2>
+                <p className="text-gray-400">Manage user accounts and balances</p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700/50">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Joined</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700/50">
+                    {users.map((user) => (
+                      <tr key={user._id} className="hover:bg-white/5">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-100">{user.name}</div>
+                            <div className="text-sm text-gray-400">{user.email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-100">${user.balance?.toLocaleString() || '0'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.isActive 
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          }`}>
+                            {user.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => setSelectedUser(user)}
+                            className="text-primary hover:text-purple-400 transition-colors"
+                          >
+                            Edit Balance
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (
+            <div className="backdrop-filter backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h2 className="text-2xl font-bold mb-6">Platform Analytics</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-lg">
+                  <h3 className="text-sm font-medium text-blue-400 mb-2">Total Users</h3>
+                  <p className="text-3xl font-bold text-blue-300">{users.length}</p>
+                </div>
+                <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-400 mb-2">Active Users</h3>
+                  <p className="text-3xl font-bold text-green-300">{users.filter(u => u.isActive).length}</p>
+                </div>
+                <div className="bg-purple-500/10 border border-purple-500/20 p-6 rounded-lg">
+                  <h3 className="text-sm font-medium text-purple-400 mb-2">Total Balance</h3>
+                  <p className="text-3xl font-bold text-purple-300">${users.reduce((sum, user) => sum + (user.balance || 0), 0).toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
       {/* Balance Edit Modal */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">
-              Edit Balance for {selectedUser.name}
-            </h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">New Balance</label>
+          <div className="backdrop-filter backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Edit Balance for {selectedUser.name}</h3>
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2 text-gray-300">New Balance</label>
               <input
                 type="number"
                 value={newBalance}
                 onChange={(e) => setNewBalance(e.target.value)}
                 placeholder={selectedUser.balance?.toString() || '0'}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-white focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => updateUserBalance(selectedUser._id, newBalance)}
-                className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
               >
                 Update
               </button>
@@ -247,7 +446,7 @@ function AdminDashboard() {
                   setSelectedUser(null)
                   setNewBalance('')
                 }}
-                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                className="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -255,6 +454,15 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .primary { color: #5D5CDE; }
+        .bg-primary { background-color: #5D5CDE; }
+        .border-primary { border-color: #5D5CDE; }
+        .text-primary { color: #5D5CDE; }
+        .from-primary { --tw-gradient-from: #5D5CDE; }
+        .to-primary { --tw-gradient-to: #5D5CDE; }
+      `}</style>
     </div>
   )
 }
