@@ -1,4 +1,3 @@
-
 const express = require('express')
 const cors = require('cors')
 const bcrypt = require('bcryptjs')
@@ -11,6 +10,12 @@ const socketIo = require('socket.io')
 const cron = require('node-cron')
 const axios = require('axios')
 require('dotenv').config()
+
+// Import database initialization
+require('./database/init')
+
+// Import routes
+const { router: authRoutes, authenticateToken } = require('./routes/auth')
 
 const app = express()
 const server = http.createServer(app)
@@ -261,7 +266,7 @@ app.get('/api/market/prices', async (req, res) => {
       'BNB/USDT': { price: 598.3 + (Math.random() - 0.5) * 50, change: 0.9 },
       'ADA/USDT': { price: 0.52 + (Math.random() - 0.5) * 0.05, change: -0.3 }
     }
-    
+
     res.json(mockPrices)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -281,7 +286,7 @@ app.get('/api/announcements', async (req, res) => {
 // Socket.io for real-time updates
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id)
-  
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id)
   })
@@ -297,7 +302,7 @@ cron.schedule('*/5 * * * * *', () => {
     'BNB/USDT': { price: 598.3 + (Math.random() - 0.5) * 50, change: (Math.random() - 0.5) * 3 },
     'ADA/USDT': { price: 0.52 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 2 }
   }
-  
+
   io.emit('marketUpdate', mockPrices)
 })
 
