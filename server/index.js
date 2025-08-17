@@ -1,232 +1,162 @@
+
 const express = require('express')
-const cors = require('cors')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
-const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
-const http = require('http')
-const socketIo = require('socket.io')
-const cron = require('node-cron')
-const axios = require('axios')
-require('dotenv').config()
-
-// Import database initialization
-require('./database/init')
-
-// Import routes
-const { router: authRoutes, authenticateToken } = require('./routes/auth')
-
-const app = express()
-const server = http.createServer(app)
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-})
-
-// Middleware
-app.use(helmet())
-app.use(cors())
-app.use(express.json())
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-})
-app.use('/api/', limiter)
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cryptotrade', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-
-// Import Models
+const cors = require('cors')
+const dotenv = require('dotenv')
+const path = require('path')
+const { router: authRouter, authenticateToken } = require('./routes/auth')
 const User = require('./models/User')
 const Admin = require('./models/Admin')
 const News = require('./models/News')
 const Announcement = require('./models/Announcement')
-const { initializeSampleData } = require('./database/init')
 
-// JWT Middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
+dotenv.config()
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' })
+const app = express()
+const PORT = process.env.PORT || 5000
+
+// Middleware
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}))
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true }))
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cryptotradingpro', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => console.error('❌ MongoDB connection error:', err))
+
+// Auth routes
+app.use('/api/auth', authRouter)
+
+// Admin-only middleware
+const requireAdmin = (req, res, next) => {
+  if (req.userRole !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' })
   }
-
-  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid token.' })
-    }
-    req.user = decoded
-    next()
-  })
+  next()
 }
 
-// Create default admin if doesn't exist
-async function createDefaultAdmin() {
-  try {
-    const adminExists = await Admin.findOne({})
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10)
-      const admin = new Admin({
-        email: 'admin@cryptotrade.pro',
-        password: hashedPassword,
-        name: 'System Administrator'
-      })
-      await admin.save()
-      console.log('Default admin created: admin@cryptotrade.pro / admin123')
-    }
-  } catch (error) {
-    console.error('Error creating default admin:', error)
+// User-only middleware
+const requireUser = (req, res, next) => {
+  if (req.userRole !== 'user') {
+    return res.status(403).json({ error: 'User access required' })
   }
+  next()
 }
 
-// Routes
-
-// User Authentication
-app.post('/api/auth/register', async (req, res) => {
+// Admin Routes
+app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { name, email, password } = req.body
-
-    const existingUser = await User.findOne({ email })
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' })
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword
-    })
-
-    await user.save()
-    res.status(201).json({ message: 'User created successfully' })
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 })
+    res.json(users)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error fetching users:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
-app.post('/api/auth/login', async (req, res) => {
+app.put('/api/admin/users/:id/balance', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { balance } = req.body
+    
+    if (typeof balance !== 'number' || balance < 0) {
+      return res.status(400).json({ error: 'Invalid balance amount' })
+    }
 
-    const user = await User.findOne({ email })
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { balance: parseFloat(balance.toFixed(2)) },
+      { new: true }
+    ).select('-password')
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' })
+      return res.status(404).json({ error: 'User not found' })
     }
 
-    const validPassword = await bcrypt.compare(password, user.password)
-    if (!validPassword) {
-      return res.status(400).json({ message: 'Invalid credentials' })
-    }
-
-    const token = jwt.sign(
-      { userId: user._id, email: user.email, type: 'user' },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '24h' }
-    )
-
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        balance: user.balance
-      }
-    })
+    res.json(user)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error updating balance:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
-// Admin Authentication
-app.post('/api/admin/login', async (req, res) => {
+app.put('/api/admin/users/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { isActive } = req.body
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive },
+      { new: true }
+    ).select('-password')
 
-    const admin = await Admin.findOne({ email })
-    if (!admin) {
-      return res.status(400).json({ message: 'Invalid admin credentials' })
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
 
-    const validPassword = await bcrypt.compare(password, admin.password)
-    if (!validPassword) {
-      return res.status(400).json({ message: 'Invalid admin credentials' })
-    }
-
-    const token = jwt.sign(
-      { adminId: admin._id, email: admin.email, type: 'admin' },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '24h' }
-    )
-
-    res.json({
-      token,
-      user: {
-        id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        type: 'admin'
-      }
-    })
+    res.json(user)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error updating user status:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
 // User Routes
-app.get('/api/user/profile', authenticateToken, async (req, res) => {
+app.get('/api/user/profile', authenticateToken, requireUser, async (req, res) => {
   try {
-    if (req.user.type !== 'user') {
-      return res.status(403).json({ message: 'Access denied' })
+    const user = await User.findById(req.user._id).select('-password')
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
-
-    const user = await User.findById(req.user.userId).select('-password')
     res.json(user)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error fetching profile:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
-// Admin Routes
-app.get('/api/admin/users', authenticateToken, async (req, res) => {
+// Market data endpoint (mock data for now)
+app.get('/api/market/prices', async (req, res) => {
   try {
-    if (req.user.type !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' })
+    // Mock market data - in production, integrate with real crypto API
+    const marketData = {
+      'BTC/USDT': { 
+        price: 68355 + (Math.random() - 0.5) * 1000, 
+        change: (Math.random() - 0.5) * 10 
+      },
+      'ETH/USDT': { 
+        price: 3210 + (Math.random() - 0.5) * 200, 
+        change: (Math.random() - 0.5) * 8 
+      },
+      'SOL/USDT': { 
+        price: 182.4 + (Math.random() - 0.5) * 20, 
+        change: (Math.random() - 0.5) * 6 
+      },
+      'XRP/USDT': { 
+        price: 0.62 + (Math.random() - 0.5) * 0.1, 
+        change: (Math.random() - 0.5) * 4 
+      },
+      'BNB/USDT': { 
+        price: 598.3 + (Math.random() - 0.5) * 50, 
+        change: (Math.random() - 0.5) * 5 
+      },
+      'ADA/USDT': { 
+        price: 0.52 + (Math.random() - 0.5) * 0.05, 
+        change: (Math.random() - 0.5) * 3 
+      }
     }
-
-    const users = await User.find({}).select('-password')
-    res.json(users)
+    res.json(marketData)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
-  }
-})
-
-app.put('/api/admin/users/:id/balance', authenticateToken, async (req, res) => {
-  try {
-    if (req.user.type !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' })
-    }
-
-    const { balance } = req.body
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { balance },
-      { new: true }
-    ).select('-password')
-
-    res.json(user)
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error fetching market data:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
@@ -236,88 +166,72 @@ app.get('/api/news', async (req, res) => {
     const news = await News.find({}).sort({ publishedAt: -1 }).limit(20)
     res.json(news)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error fetching news:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
-app.post('/api/admin/news', authenticateToken, async (req, res) => {
+app.post('/api/admin/news', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    if (req.user.type !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' })
-    }
-
     const news = new News(req.body)
     await news.save()
     res.status(201).json(news)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
-  }
-})
-
-// Market Data Routes (Mock for simulation)
-app.get('/api/market/prices', async (req, res) => {
-  try {
-    // Mock crypto prices - in real app, integrate with CoinGecko/Binance API
-    const mockPrices = {
-      'BTC/USDT': { price: 68355 + (Math.random() - 0.5) * 1000, change: 1.2 },
-      'ETH/USDT': { price: 3210 + (Math.random() - 0.5) * 200, change: -0.4 },
-      'SOL/USDT': { price: 182.4 + (Math.random() - 0.5) * 20, change: 2.1 },
-      'XRP/USDT': { price: 0.62 + (Math.random() - 0.5) * 0.1, change: 0.7 },
-      'BNB/USDT': { price: 598.3 + (Math.random() - 0.5) * 50, change: 0.9 },
-      'ADA/USDT': { price: 0.52 + (Math.random() - 0.5) * 0.05, change: -0.3 }
-    }
-
-    res.json(mockPrices)
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error creating news:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
 // Announcements Routes
 app.get('/api/announcements', async (req, res) => {
   try {
-    const announcements = await Announcement.find({ active: true }).sort({ createdAt: -1 })
+    const announcements = await Announcement.find({}).sort({ createdAt: -1 }).limit(10)
     res.json(announcements)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Error fetching announcements:', error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
-// Socket.io for real-time updates
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id)
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id)
-  })
-})
-
-// Broadcast market data every 5 seconds
-cron.schedule('*/5 * * * * *', () => {
-  const mockPrices = {
-    'BTC/USDT': { price: 68355 + (Math.random() - 0.5) * 1000, change: (Math.random() - 0.5) * 5 },
-    'ETH/USDT': { price: 3210 + (Math.random() - 0.5) * 200, change: (Math.random() - 0.5) * 3 },
-    'SOL/USDT': { price: 182.4 + (Math.random() - 0.5) * 20, change: (Math.random() - 0.5) * 4 },
-    'XRP/USDT': { price: 0.62 + (Math.random() - 0.5) * 0.1, change: (Math.random() - 0.5) * 2 },
-    'BNB/USDT': { price: 598.3 + (Math.random() - 0.5) * 50, change: (Math.random() - 0.5) * 3 },
-    'ADA/USDT': { price: 0.52 + (Math.random() - 0.5) * 0.05, change: (Math.random() - 0.5) * 2 }
+app.post('/api/admin/announcements', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const announcement = new Announcement({
+      ...req.body,
+      createdBy: req.user._id
+    })
+    await announcement.save()
+    res.status(201).json(announcement)
+  } catch (error) {
+    console.error('Error creating announcement:', error)
+    res.status(500).json({ error: 'Server error' })
   }
-
-  io.emit('marketUpdate', mockPrices)
 })
 
-const PORT = process.env.PORT || 5000
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running' })
+})
 
-// Initialize default admin and start server
-Promise.all([
-  createDefaultAdmin(),
-  initializeSampleData()
-]).then(() => {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`)
-    console.log('Default admin: admin@cryptotrade.pro / admin123')
-    console.log('MongoDB connected:', mongoose.connection.readyState === 1 ? 'Yes' : 'No')
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../dist')))
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'))
   })
-}).catch(error => {
-  console.error('Initialization error:', error)
+}
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Global error:', err)
+  res.status(500).json({ error: 'Internal server error' })
+})
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' })
+})
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`)
 })

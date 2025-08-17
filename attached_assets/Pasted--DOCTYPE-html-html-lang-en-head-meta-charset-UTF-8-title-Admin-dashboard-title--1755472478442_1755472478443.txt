@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Admin dashboard</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim Pro - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4A49C4',
+                        'bg-light': '#FFFFFF',
+                        'bg-dark': '#181818',
+                        'card-dark': '#1F1F23',
+                        'sidebar-dark': '#16161A',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-in-out',
+                        'slide-up': 'slideUp 0.8s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'bounce-slow': 'bounce 3s infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(93, 92, 222, 0.3); }
+            to { box-shadow: 0 0 30px rgba(93, 92, 222, 0.6); }
+        }
+        .glass-effect {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #5D5CDE 0%, #8B5CF6 50%, #EC4899 100%);
+        }
+        .crypto-pattern {
+            background-image: 
+                radial-gradient(circle at 1px 1px, rgba(93, 92, 222, 0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(93, 92, 222, 0.2);
+        }
+        .sidebar-gradient {
+            background: linear-gradient(180deg, #16161A 0%, #1F1F23 50%, #16161A 100%);
+        }
+        .animated-border {
+            position: relative;
+            overflow: hidden;
+        }
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(93, 92, 222, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        .animated-border:hover::before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 crypto-pattern opacity-20 pointer-events-none"></div>
+    <div class="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-600/5 pointer-events-none"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-screen w-64 sidebar-gradient border-r border-gray-700/50 transform transition-all duration-300 z-40">
+        <!-- Logo Section -->
+        <div class="p-6 border-b border-gray-700/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center animate-pulse-slow">
+                    <span class="text-white font-bold text-lg">₿</span>
+                </div>
+                <div class="sidebar-text">
+                    <h2 class="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">CryptoSim</h2>
+                    <p class="text-xs text-gray-400">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="mt-6 px-3">
+            <div class="space-y-2">
+                <a href="#" class="nav-item active flex items-center px-4 py-3 rounded-xl bg-primary/20 text-primary border border-primary/30 animate-glow">
+                    <span class="text-xl mr-4">🏠</span>
+                    <span class="sidebar-text font-medium">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">👥</span>
+                    <span class="sidebar-text">User Management</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">💰</span>
+                    <span class="sidebar-text">Balance Control</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">📊</span>
+                    <span class="sidebar-text">Analytics</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">📰</span>
+                    <span class="sidebar-text">News Manager</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">🔔</span>
+                    <span class="sidebar-text">Notifications</span>
+                </a>
+                <a href="#" class="nav-item flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+                    <span class="text-xl mr-4">⚙️</span>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Admin Status -->
+        <div class="absolute bottom-6 left-3 right-3">
+            <div class="glass-effect rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center animate-bounce-slow">
+                        <span class="text-white text-sm">👤</span>
+                    </div>
+                    <div class="sidebar-text">
+                        <p class="text-sm font-medium">Admin User</p>
+                        <p class="text-xs text-green-400 flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                            Online
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="ml-64 transition-all duration-300">
+        <!-- Top Bar -->
+        <header class="glass-effect border-b border-gray-700/50 p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="p-2 rounded-xl hover:bg-gray-700/50 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                            Welcome back, Admin
+                        </h1>
+                        <p class="text-gray-400 text-sm">Monitor and manage your crypto simulation platform</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Real-time indicator -->
+                    <div class="flex items-center space-x-2 px-3 py-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-green-400 text-sm font-medium">Live</span>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <button class="relative p-2 rounded-xl hover:bg-gray-700/50 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19c-5 0-8-4-8-9s4-9 9-9 9 4 9 9c0 4-3 6-7 8l-2-1v-1.5c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v.5H9z"></path>
+                        </svg>
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">3</div>
+                    </button>
+                    
+                    <!-- Logout -->
+                    <button onclick="logout()" class="px-6 py-2 gradient-bg rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <main class="p-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Users -->
+                <div class="glass-effect rounded-2xl p-6 card-hover animated-border">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <div class="text-green-400 text-sm font-medium flex items-center">
+                            <span class="mr-1">↗</span> +12%
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1" id="total-users">8,547</h3>
+                    <p class="text-gray-400 text-sm">Total Users</p>
+                    <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full animate-pulse" style="width: 78%"></div>
+                    </div>
+                </div>
+
+                <!-- Active Traders -->
+                <div class="glass-effect rounded-2xl p-6 card-hover animated-border">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-2xl">📈</span>
+                        </div>
+                        <div class="text-green-400 text-sm font-medium flex items-center">
+                            <span class="mr-1">↗</span> +8%
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1" id="active-traders">2,341</h3>
+                    <p class="text-gray-400 text-sm">Active Traders</p>
+                    <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full animate-pulse" style="width: 65%"></div>
+                    </div>
+                </div>
+
+                <!-- Total Volume -->
+                <div class="glass-effect rounded-2xl p-6 card-hover animated-border">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-2xl">💰</span>
+                        </div>
+                        <div class="text-green-400 text-sm font-medium flex items-center">
+                            <span class="mr-1">↗</span> +23%
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1" id="total-volume">$45.2M</h3>
+                    <p class="text-gray-400 text-sm">Simulated Volume</p>
+                    <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full animate-pulse" style="width: 89%"></div>
+                    </div>
+                </div>
+
+                <!-- Platform Health -->
+                <div class="glass-effect rounded-2xl p-6 card-hover animated-border">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                            <span class="text-2xl">⚡</span>
+                        </div>
+                        <div class="text-green-400 text-sm font-medium flex items-center">
+                            <span class="mr-1">✓</span> Healthy
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">99.9%</h3>
+                    <p class="text-gray-400 text-sm">System Uptime</p>
+                    <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full animate-pulse" style="width: 99%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Trading Activity Chart -->
+                <div class="lg:col-span-2 glass-effect rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold">Trading Activity</h3>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 bg-primary rounded-lg text-sm">24H</button>
+                            <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm">7D</button>
+                            <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm">30D</button>
+                        </div>
+                    </div>
+                    <div class="h-64 relative" id="trading-chart">
+                        <!-- Simulated Chart -->
+                        <div class="absolute inset-0 flex items-end justify-between px-4">
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 60%"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 40%; animation-delay: 0.1s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 80%; animation-delay: 0.2s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 55%; animation-delay: 0.3s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 75%; animation-delay: 0.4s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 45%; animation-delay: 0.5s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 90%; animation-delay: 0.6s"></div>
+                            <div class="w-8 bg-gradient-to-t from-primary to-purple-400 rounded-t animate-pulse" style="height: 65%; animation-delay: 0.7s"></div>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent rounded-lg"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-6">Quick Actions</h3>
+                    <div class="space-y-4">
+                        <button class="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center">
+                            <span class="text-xl mr-3">💰</span>
+                            <span class="font-medium">Simulate Balance</span>
+                        </button>
+                        <button class="w-full p-4 bg-gradient-to-r from-green-600 to-green-500 rounded-xl hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 flex items-center">
+                            <span class="text-xl mr-3">📢</span>
+                            <span class="font-medium">Send Announcement</span>
+                        </button>
+                        <button class="w-full p-4 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 flex items-center">
+                            <span class="text-xl mr-3">👥</span>
+                            <span class="font-medium">Manage Users</span>
+                        </button>
+                        <button class="w-full p-4 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300 flex items-center">
+                            <span class="text-xl mr-3">📊</span>
+                            <span class="font-medium">View Reports</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & System Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Recent Activity -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-6">Recent Activity</h3>
+                    <div class="space-y-4" id="recent-activity">
+                        <!-- Activity items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-6">System Status</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                <span>Trading Engine</span>
+                            </div>
+                            <span class="text-green-400 text-sm font-medium">Operational</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                <span>Market Data Feed</span>
+                            </div>
+                            <span class="text-green-400 text-sm font-medium">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-yellow-400 rounded-full mr-3 animate-pulse"></div>
+                                <span>News Service</span>
+                            </div>
+                            <span class="text-yellow-400 text-sm font-medium">Syncing</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                <span>User Authentication</span>
+                            </div>
+                            <span class="text-green-400 text-sm font-medium">Secure</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let sidebarCollapsed = false;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            sidebarCollapsed = !sidebarCollapsed;
+            
+            if (sidebarCollapsed) {
+                sidebar.style.width = '80px';
+                mainContent.style.marginLeft = '80px';
+                sidebarTexts.forEach(text => text.style.display = 'none');
+            } else {
+                sidebar.style.width = '256px';
+                mainContent.style.marginLeft = '256px';
+                sidebarTexts.forEach(text => text.style.display = 'block');
+            }
+        }
+
+        function logout() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-effect p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white text-2xl">🚪</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Confirm Logout</h3>
+                        <p class="text-gray-400 mb-6">Are you sure you want to sign out of your admin session?</p>
+                        <div class="flex space-x-3">
+                            <button onclick="this.closest('.fixed').remove()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors">
+                                Cancel
+                            </button>
+                            <button onclick="window.location.href='#'" class="flex-1 px-4 py-2 gradient-bg text-white rounded-xl hover:shadow-lg transition-all">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Animate numbers on page load
+        function animateNumber(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (element.id === 'total-volume') {
+                    element.textContent = '$' + (current / 1000000).toFixed(1) + 'M';
+                } else if (element.id === 'total-users') {
+                    element.textContent = Math.floor(current).toLocaleString();
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // Populate recent activity
+        function populateRecentActivity() {
+            const activities = [
+                { type: 'user', message: 'New user registered: trader_mike23', time: '2 minutes ago', icon: '👤' },
+                { type: 'trade', message: 'Large trade executed: $50,000 BTC/USD', time: '5 minutes ago', icon: '💱' },
+                { type: 'alert', message: 'Price alert triggered for ETH', time: '8 minutes ago', icon: '🚨' },
+                { type: 'system', message: 'System backup completed successfully', time: '15 minutes ago', icon: '💾' },
+                { type: 'news', message: 'News article published: Bitcoin Rally', time: '23 minutes ago', icon: '📰' }
+            ];
+
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = activities.map(activity => `
+                <div class="flex items-center p-3 bg-gray-800/30 rounded-lg hover:bg-gray-700/30 transition-colors">
+                    <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-lg">${activity.icon}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-300">${activity.message}</p>
+                        <p class="text-xs text-gray-500">${activity.time}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update stats periodically
+        function updateStats() {
+            const totalUsers = document.getElementById('total-users');
+            const activeTraders = document.getElementById('active-traders');
+            const totalVolume = document.getElementById('total-volume');
+            
+            // Simulate real-time updates
+            const currentUsers = parseInt(totalUsers.textContent.replace(/,/g, ''));
+            const currentTraders = parseInt(activeTraders.textContent.replace(/,/g, ''));
+            const currentVolume = parseFloat(totalVolume.textContent.replace('$', '').replace('M', ''));
+            
+            totalUsers.textContent = (currentUsers + Math.floor(Math.random() * 10)).toLocaleString();
+            activeTraders.textContent = (currentTraders + Math.floor(Math.random() * 5)).toLocaleString();
+            totalVolume.textContent = '$' + (currentVolume + Math.random() * 0.5).toFixed(1) + 'M';
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate initial numbers
+            setTimeout(() => {
+                animateNumber(document.getElementById('total-users'), 8547);
+                animateNumber(document.getElementById('active-traders'), 2341);
+            }, 500);
+
+            // Populate recent activity
+            populateRecentActivity();
+
+            // Update stats every 10 seconds
+            setInterval(updateStats, 10000);
+
+            // Add fade-in animation to cards
+            const cards = document.querySelectorAll('.glass-effect');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
