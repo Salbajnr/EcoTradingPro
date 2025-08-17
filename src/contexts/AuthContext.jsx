@@ -30,7 +30,8 @@ export function AuthProvider({ children }) {
   const login = async (credentials, type = 'user') => {
     try {
       const endpoint = type === 'admin' ? '/api/admin/login' : '/api/auth/login'
-      const response = await axios.post(`http://localhost:5000${endpoint}`, credentials)
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const response = await axios.post(`${baseURL}${endpoint}`, credentials)
       
       const { token, user: userData } = response.data
       
@@ -50,7 +51,8 @@ export function AuthProvider({ children }) {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', userData)
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const response = await axios.post(`${baseURL}/api/auth/register`, userData)
       return { success: true, message: response.data.message }
     } catch (error) {
       return { 

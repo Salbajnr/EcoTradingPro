@@ -44,6 +44,7 @@ const User = require('./models/User')
 const Admin = require('./models/Admin')
 const News = require('./models/News')
 const Announcement = require('./models/Announcement')
+const { initializeSampleData } = require('./database/init')
 
 // JWT Middleware
 const authenticateToken = (req, res, next) => {
@@ -303,9 +304,15 @@ cron.schedule('*/5 * * * * *', () => {
 const PORT = process.env.PORT || 5000
 
 // Initialize default admin and start server
-createDefaultAdmin().then(() => {
+Promise.all([
+  createDefaultAdmin(),
+  initializeSampleData()
+]).then(() => {
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on http://0.0.0.0:${PORT}`)
     console.log('Default admin: admin@cryptotrade.pro / admin123')
+    console.log('MongoDB connected:', mongoose.connection.readyState === 1 ? 'Yes' : 'No')
   })
+}).catch(error => {
+  console.error('Initialization error:', error)
 })

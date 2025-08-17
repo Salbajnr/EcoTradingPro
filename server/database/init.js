@@ -9,6 +9,68 @@ const Admin = require('../models/Admin')
 const News = require('../models/News')
 const Announcement = require('../models/Announcement')
 
+async function initializeSampleData() {
+  try {
+    // Create sample news if none exist
+    const newsCount = await News.countDocuments()
+    if (newsCount === 0) {
+      const sampleNews = [
+        {
+          title: "Bitcoin Reaches New All-Time High",
+          content: "Bitcoin has surged to unprecedented levels, breaking through previous resistance...",
+          author: "CryptoNews Team",
+          publishedAt: new Date(),
+          source: "CryptoNews"
+        },
+        {
+          title: "Ethereum 2.0 Staking Rewards Increase",
+          content: "The latest update to Ethereum's staking mechanism has increased rewards for validators...",
+          author: "DeFi Analyst",
+          publishedAt: new Date(Date.now() - 86400000), // 1 day ago
+          source: "DeFi Today"
+        },
+        {
+          title: "Regulatory Clarity Boosts Crypto Markets",
+          content: "New regulatory guidelines have provided much-needed clarity for the cryptocurrency industry...",
+          author: "Regulatory Expert",
+          publishedAt: new Date(Date.now() - 172800000), // 2 days ago
+          source: "Crypto Regulation"
+        }
+      ]
+      
+      await News.insertMany(sampleNews)
+      console.log('Sample news created')
+    }
+
+    // Create sample announcements if none exist
+    const announcementCount = await Announcement.countDocuments()
+    if (announcementCount === 0) {
+      const sampleAnnouncements = [
+        {
+          title: "Welcome to EcoTradingPro!",
+          content: "Welcome to our cryptocurrency trading simulation platform. Start with $10,000 virtual balance and practice trading!",
+          type: "info",
+          active: true
+        },
+        {
+          title: "New Features Available",
+          content: "We've added real-time market data and improved the trading interface for a better experience.",
+          type: "update",
+          active: true
+        }
+      ]
+      
+      await Announcement.insertMany(sampleAnnouncements)
+      console.log('Sample announcements created')
+    }
+
+  } catch (error) {
+    console.error('Error initializing sample data:', error)
+  }
+}
+
+module.exports = { initializeSampleData }
+
 const initDatabase = async () => {
   try {
     // Connect to MongoDB
