@@ -1,0 +1,40 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+}
+
+.glass {
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.4));
+  border: 1px solid rgba(255,255,255,.5);
+}
+
+.dark .glass {
+  background: linear-gradient(180deg, rgba(11,55,95,.35), rgba(11,55,95,.15));
+  border-color: rgba(255,255,255,.08);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(11,55,95,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11,55,95,.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.hero-gradient {
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(10,132,255,.25), transparent 60%),
+              radial-gradient(800px 400px at 10% 0%, rgba(16,185,129,.15), transparent 60%);
+}
+
+@keyframes marquee { 
+  0% {transform: translateX(0)} 
+  100% {transform: translateX(-50%)} 
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
