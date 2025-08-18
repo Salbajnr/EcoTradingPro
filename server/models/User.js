@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
@@ -26,14 +25,23 @@ const userSchema = new mongoose.Schema({
   },
   balance: { 
     type: Number, 
-    default: 10000.00 
+    default: 0.00 
   },
   portfolio: { 
-    type: Object, 
+    type: Map, 
+    of: Number, 
     default: {} 
   },
   trades: [{ 
-    type: Object 
+    id: String,
+    type: { type: String, enum: ['buy', 'sell'] },
+    asset: String,
+    amount: Number,
+    price: Number,
+    quantity: Number,
+    orderType: { type: String, enum: ['market', 'limit'] },
+    timestamp: { type: Date, default: Date.now },
+    status: { type: String, default: 'completed' }
   }],
   isActive: {
     type: Boolean,

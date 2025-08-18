@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Routes, Route } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { useProfile } from '../../contexts/ProfileContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import Chart from 'chart.js/auto'
+import Portfolio from './Portfolio'
+import Trading from './Trading'
 
 function UserDashboard() {
   const { user, logout } = useAuth()
-  const { profile, loading: profileLoading } = useProfile()
   const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const chartRef = useRef(null)
@@ -182,19 +182,19 @@ function UserDashboard() {
               <i className="fas fa-home text-lg"></i>
               {!sidebarCollapsed && <span>Dashboard</span>}
             </Link>
-            <Link to="/markets" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
-              <i className="fas fa-chart-bar text-lg"></i>
-              {!sidebarCollapsed && <span>Markets</span>}
-            </Link>
-            <Link to="/portfolio" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+            <Link to="/dashboard/portfolio" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-wallet text-lg"></i>
               {!sidebarCollapsed && <span>Portfolio</span>}
             </Link>
-            <Link to="/trade" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+            <Link to="/dashboard/trading" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-exchange-alt text-lg"></i>
               {!sidebarCollapsed && <span>Trade</span>}
             </Link>
-            <Link to="/transactions" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+            <Link to="/dashboard/markets" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-chart-bar text-lg"></i>
+              {!sidebarCollapsed && <span>Markets</span>}
+            </Link>
+            <Link to="/dashboard/transactions" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-history text-lg"></i>
               {!sidebarCollapsed && <span>Transactions</span>}
             </Link>
@@ -256,7 +256,43 @@ function UserDashboard() {
 
           {/* Dashboard Content */}
           <main className="p-6">
-            {/* Stats Grid */}
+            <Routes>
+              <Route path="/" element={<DashboardHome />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/trading" element={<Trading />} />
+              <Route path="/markets" element={<div>Markets coming soon...</div>} />
+              <Route path="/transactions" element={<div>Transactions coming soon...</div>} />
+            </Routes>
+          </main>
+            function DashboardHome() {
+  const { user } = useAuth()
+  const [portfolioData, setPortfolioData] = useState({
+    totalValue: 42689.24,
+    dailyChange: 1280.50,
+    dailyChangePercent: 3.1,
+    activeOrders: 12
+  })
+  const [marketData, setMarketData] = useState({
+    'BTC/USDT': { price: 68355, change: 1.2 },
+    'ETH/USDT': { price: 3210, change: -0.4 },
+    'SOL/USDT': { price: 182.4, change: 2.1 },
+    'XRP/USDT': { price: 0.62, change: 0.7 },
+    'BNB/USDT': { price: 598.3, change: 0.9 },
+    'ADA/USDT': { price: 0.52, change: -0.3 }
+  })
+
+  const cryptoIcons = {
+    'BTC': '₿',
+    'ETH': 'Ξ',
+    'SOL': '◎',
+    'XRP': 'X',
+    'BNB': 'B',
+    'ADA': '₳'
+  }
+
+  return (
+    <>
+      {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="glass rounded-2xl p-6 hover:shadow-glow transition">
                 <div className="flex justify-between items-start mb-4">
@@ -503,7 +539,10 @@ function UserDashboard() {
                 </div>
               </div>
             </div>
-          </main>
+          </>
+        )
+      }
+
         </div>
       </div>
     </div>
