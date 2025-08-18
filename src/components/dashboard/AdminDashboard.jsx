@@ -369,7 +369,7 @@ function AdminDashboard() {
                       <tr key={user._id} className="hover:bg-white/5">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-gray-100">{user.name}</div>
+                            <div className="text-sm font-medium text-gray-100">{user.firstName} {user.lastName}</div>
                             <div className="text-sm text-gray-400">{user.email}</div>
                           </div>
                         </td>

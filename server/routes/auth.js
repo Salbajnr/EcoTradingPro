@@ -50,7 +50,7 @@ router.post('/user/register', authLimiter, async (req, res) => {
       password: hashedPassword,
       firstName,
       lastName,
-      balance: 0.00, // Default balance, admin can simulate any amount
+      balance: 10000.00, // Default balance, admin can simulate any amount
       isActive: true
     })
 

@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   balance: { 
     type: Number, 
-    default: 0.00 
+    default: 10000.00 
   },
   portfolio: { 
     type: Object, 

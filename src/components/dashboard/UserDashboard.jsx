@@ -2,11 +2,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import Chart from 'chart.js/auto'
 
 function UserDashboard() {
   const { user, logout } = useAuth()
+  const { profile, loading: profileLoading } = useProfile()
   const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const chartRef = useRef(null)

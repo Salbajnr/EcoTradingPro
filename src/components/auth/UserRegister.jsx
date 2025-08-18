@@ -5,7 +5,8 @@ import { useAuth } from '../../contexts/AuthContext'
 
 function UserRegister() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -29,7 +30,8 @@ function UserRegister() {
     }
 
     const result = await register({
-      name: formData.name,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
       password: formData.password
     })
@@ -82,17 +84,31 @@ function UserRegister() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Full Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="Enter your full name"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  placeholder="First name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  placeholder="Last name"
+                />
+              </div>
             </div>
 
             <div>
