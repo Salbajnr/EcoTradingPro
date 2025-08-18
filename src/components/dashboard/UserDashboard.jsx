@@ -23,6 +23,17 @@ function UserDashboard() {
     'ADA/USDT': { price: 0.52, change: -0.3 }
   })
 
+  // Fetch market data
+  const fetchMarketData = async () => {
+    try {
+      const response = await fetch('/api/market/prices')
+      const data = await response.json()
+      setMarketData(data)
+    } catch (error) {
+      console.error('Error fetching market data:', error)
+    }
+  }
+
   const [portfolioData, setPortfolioData] = useState({
     totalValue: 42689.24,
     dailyChange: 1280.50,
@@ -39,6 +50,12 @@ function UserDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
+    // Fetch initial market data
+    fetchMarketData()
+    
+    // Set up periodic updates every 30 seconds
+    const marketInterval = setInterval(fetchMarketData, 30000)
+    
     // Initialize chart
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d')
@@ -99,6 +116,7 @@ function UserDashboard() {
       if (chartInstance.current) {
         chartInstance.current.destroy()
       }
+      clearInterval(marketInterval)
     }
   }, [isDark])
 

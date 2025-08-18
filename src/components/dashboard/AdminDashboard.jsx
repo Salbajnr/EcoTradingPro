@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import axios from 'axios'
+import axios from '../../utils/axios'
 
 function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -25,7 +25,10 @@ function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('/api/admin/users')
+      const token = localStorage.getItem('token')
+      const response = await axios.get('/api/admin/users', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setUsers(response.data)
       setLoading(false)
     } catch (error) {
@@ -36,7 +39,11 @@ function AdminDashboard() {
 
   const updateUserBalance = async (userId, balance) => {
     try {
-      const response = await axios.put(`/api/admin/users/${userId}/balance`, { balance: parseFloat(balance) })
+      const token = localStorage.getItem('token')
+      const response = await axios.put(`/api/admin/users/${userId}/balance`, 
+        { balance: parseFloat(balance) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       setUsers(users.map(user => user._id === userId ? response.data : user))
       setSelectedUser(null)
       setNewBalance('')
