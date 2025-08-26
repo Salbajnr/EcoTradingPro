@@ -7,6 +7,7 @@ const { router: authRouter, authenticateToken } = require('./routes/auth')
 const adminRouter = require('./routes/admin')
 const usersRouter = require('./routes/users')
 const marketRouter = require('./routes/market')
+const newsRouter = require('./routes/news')
 const User = require('./models/User')
 const Admin = require('./models/Admin')
 const News = require('./models/News')
@@ -40,6 +41,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/market', marketRouter)
+app.use('/api/news', newsRouter)
 
 // Admin-only middleware
 const requireAdmin = (req, res, next) => {

@@ -1,8 +1,14 @@
-
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, Routes, Route } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import axios from '../../utils/axios'
+import NewsManagement from './NewsManagement'
+
+// Placeholder for AdminDashboardHome and UserManagement components if they were defined elsewhere
+const AdminDashboardHome = () => <div>Dashboard Content</div>;
+const UserManagement = () => <div>User Management Content</div>;
+
 
 function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -40,7 +46,7 @@ function AdminDashboard() {
   const updateUserBalance = async (userId, balance) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.put(`/api/admin/users/${userId}/balance`, 
+      const response = await axios.put(`/api/admin/users/${userId}/balance`,
         { balance: parseFloat(balance) },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -86,7 +92,7 @@ function AdminDashboard() {
       <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-600/5 pointer-events-none"></div>
 
       {/* Sidebar */}
-      <div 
+      <div
         className={`fixed left-0 top-0 h-screen ${sidebarCollapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-r border-gray-700/50 transform transition-all duration-300 z-40`}
       >
         {/* Logo Section */}
@@ -107,51 +113,58 @@ function AdminDashboard() {
         {/* Navigation */}
         <nav className="mt-6 px-3">
           <div className="space-y-2">
-            <button 
+            <button
               onClick={() => setActiveTab('dashboard')}
               className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === 'dashboard' 
-                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                activeTab === 'dashboard'
+                  ? 'bg-primary/20 text-primary border border-primary/30'
                   : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
               }`}
             >
               <span className="text-xl mr-4">🏠</span>
               {!sidebarCollapsed && <span className="font-medium">Dashboard</span>}
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('users')}
               className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === 'users' 
-                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                activeTab === 'users'
+                  ? 'bg-primary/20 text-primary border border-primary/30'
                   : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
               }`}
             >
               <span className="text-xl mr-4">👥</span>
               {!sidebarCollapsed && <span className="font-medium">User Management</span>}
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('balance')}
               className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === 'balance' 
-                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                activeTab === 'balance'
+                  ? 'bg-primary/20 text-primary border border-primary/30'
                   : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
               }`}
             >
               <span className="text-xl mr-4">💰</span>
               {!sidebarCollapsed && <span className="font-medium">Balance Control</span>}
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('analytics')}
               className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === 'analytics' 
-                  ? 'bg-primary/20 text-primary border border-primary/30' 
+                activeTab === 'analytics'
+                  ? 'bg-primary/20 text-primary border border-primary/30'
                   : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
               }`}
             >
               <span className="text-xl mr-4">📊</span>
               {!sidebarCollapsed && <span className="font-medium">Analytics</span>}
             </button>
-            <button className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-800/50 text-gray-300 hover:text-white transition-all duration-300">
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === 'news'
+                  ? 'bg-primary/20 text-primary border border-primary/30'
+                  : 'hover:bg-gray-800/50 text-gray-300 hover:text-white'
+              }`}
+            >
               <span className="text-xl mr-4">📰</span>
               {!sidebarCollapsed && <span className="font-medium">News Manager</span>}
             </button>
@@ -205,7 +218,7 @@ function AdminDashboard() {
                 <p className="text-gray-400 text-sm">Monitor and manage your crypto simulation platform</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* Theme Toggle */}
               <button
@@ -220,7 +233,7 @@ function AdminDashboard() {
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-green-400 text-sm font-medium">Live</span>
               </div>
-              
+
               {/* Notifications */}
               <button className="relative p-2 rounded-xl hover:bg-gray-700/50 transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,9 +241,9 @@ function AdminDashboard() {
                 </svg>
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">3</div>
               </button>
-              
+
               {/* Logout */}
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-6 py-2 bg-gradient-to-r from-primary to-purple-600 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 font-medium"
               >
@@ -240,8 +253,15 @@ function AdminDashboard() {
           </div>
         </header>
 
-        {/* Dashboard Content */}
+        {/* Main Content Area */}
         <main className="p-6">
+          <Routes>
+            <Route path="/" element={<AdminDashboardHome />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/news" element={<NewsManagement />} />
+            <Route path="/analytics" element={<div>Analytics coming soon...</div>} />
+          </Routes>
+
           {activeTab === 'dashboard' && (
             <>
               {/* Stats Cards */}
@@ -317,7 +337,7 @@ function AdminDashboard() {
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                <button 
+                <button
                   onClick={() => setActiveTab('balance')}
                   className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center"
                 >
@@ -328,14 +348,14 @@ function AdminDashboard() {
                   <span className="text-2xl mr-3">📢</span>
                   <span className="font-medium">Send Announcement</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab('users')}
                   className="w-full p-6 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 flex items-center justify-center"
                 >
                   <span className="text-2xl mr-3">👥</span>
                   <span className="font-medium">Manage Users</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab('analytics')}
                   className="w-full p-6 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300 flex items-center justify-center"
                 >
@@ -352,7 +372,7 @@ function AdminDashboard() {
                 <h2 className="text-2xl font-bold mb-2">User Management</h2>
                 <p className="text-gray-400">Manage user accounts and balances</p>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
@@ -378,7 +398,7 @@ function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            user.isActive 
+                            user.isActive
                               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                               : 'bg-red-500/20 text-red-400 border border-red-500/30'
                           }`}>

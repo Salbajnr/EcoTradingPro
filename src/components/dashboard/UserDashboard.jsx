@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, Routes, Route } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -54,14 +53,14 @@ function UserDashboard() {
   useEffect(() => {
     // Fetch initial market data
     fetchMarketData()
-    
+
     // Set up periodic updates every 30 seconds
     const marketInterval = setInterval(fetchMarketData, 30000)
-    
+
     // Initialize chart
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d')
-      
+
       if (chartInstance.current) {
         chartInstance.current.destroy()
       }
@@ -190,6 +189,10 @@ function UserDashboard() {
               <i className="fas fa-exchange-alt text-lg"></i>
               {!sidebarCollapsed && <span>Trade</span>}
             </Link>
+            <Link to="/dashboard/news" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-newspaper text-lg"></i>
+              {!sidebarCollapsed && <span>News</span>}
+            </Link>
             <Link to="/dashboard/markets" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-chart-bar text-lg"></i>
               {!sidebarCollapsed && <span>Markets</span>}
@@ -234,7 +237,7 @@ function UserDashboard() {
                   <i className="fas fa-bell"></i>
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
                 </button>
-                
+
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-emerald-500 flex items-center justify-center text-white font-bold">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
@@ -260,6 +263,7 @@ function UserDashboard() {
               <Route path="/" element={<DashboardHome />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/trading" element={<Trading />} />
+              <Route path="/news" element={<div>News Management System coming soon...</div>} />
               <Route path="/markets" element={<div>Markets coming soon...</div>} />
               <Route path="/transactions" element={<div>Transactions coming soon...</div>} />
             </Routes>

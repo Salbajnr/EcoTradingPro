@@ -1,6 +1,6 @@
-
 const express = require('express')
 const User = require('../models/User')
+const News = require('../models/News')
 const { authenticateToken } = require('./auth')
 
 const router = express.Router()
@@ -91,6 +91,100 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
     })
   } catch (error) {
     console.error('Error fetching stats:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// --- News Management Endpoints ---
+
+// Create a new news article
+router.post('/news', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content, author } = req.body
+    const newNews = new News({
+      title,
+      content,
+      author: author || 'Admin' // Default author if not provided
+    })
+    await newNews.save()
+    res.status(201).json(newNews)
+  } catch (error) {
+    console.error('Error creating news:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Get all news articles (published and unpublished)
+router.get('/news', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const news = await News.find().sort({ createdAt: -1 })
+    res.json(news)
+  } catch (error) {
+    console.error('Error fetching news:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Get a single news article by ID
+router.get('/news/:newsId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { newsId } = req.params
+    const news = await News.findById(newsId)
+    if (!news) {
+      return res.status(404).json({ error: 'News not found' })
+    }
+    res.json(news)
+  } catch (error) {
+    console.error('Error fetching news:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Update a news article
+router.put('/news/:newsId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { newsId } = req.params
+    const { title, content, isPublished } = req.body
+
+    const updatedNews = await News.findByIdAndUpdate(
+      newsId,
+      { title, content, isPublished },
+      { new: true }
+    )
+
+    if (!updatedNews) {
+      return res.status(404).json({ error: 'News not found' })
+    }
+    res.json(updatedNews)
+  } catch (error) {
+    console.error('Error updating news:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Delete a news article
+router.delete('/news/:newsId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { newsId } = req.params
+    const deletedNews = await News.findByIdAndDelete(newsId)
+
+    if (!deletedNews) {
+      return res.status(404).json({ error: 'News not found' })
+    }
+    res.json({ message: 'News article deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting news:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Get published news articles for public view
+router.get('/news/published', async (req, res) => {
+  try {
+    const publishedNews = await News.find({ isPublished: true }).sort({ createdAt: -1 })
+    res.json(publishedNews)
+  } catch (error) {
+    console.error('Error fetching published news:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
