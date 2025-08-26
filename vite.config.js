@@ -7,7 +7,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: 'all',
+    allowedHosts: [
+      'all',
+      '3e7d5525-a60c-42f8-a162-262a1428a410-00-ukswv9huvljt.picard.replit.dev'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
