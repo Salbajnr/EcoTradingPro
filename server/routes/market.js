@@ -1,82 +1,23 @@
 
 const express = require('express')
-const axios = require('axios')
+const marketService = require('../services/marketService')
 
 const router = express.Router()
 
-// Cache for market data
-let marketDataCache = {}
-let lastFetch = 0
-const CACHE_DURATION = 30000 // 30 seconds
-
-// Get cryptocurrency prices from CoinGecko
+// Get current cryptocurrency prices
 router.get('/prices', async (req, res) => {
   try {
-    const now = Date.now()
+    const marketData = marketService.getCurrentData()
     
-    // Return cached data if still fresh
-    if (now - lastFetch < CACHE_DURATION && Object.keys(marketDataCache).length > 0) {
-      return res.json(marketDataCache)
+    if (Object.keys(marketData).length === 0) {
+      // Fetch fresh data if cache is empty
+      await marketService.fetchMarketData()
     }
-
-    // Fetch fresh data from CoinGecko
-    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
-      params: {
-        ids: 'bitcoin,ethereum,solana,cardano,ripple,binancecoin',
-        vs_currencies: 'usd',
-        include_24hr_change: 'true',
-        include_24hr_vol: 'true'
-      }
-    })
-
-    // Transform the data
-    const transformedData = {
-      'BTC/USDT': {
-        price: response.data.bitcoin.usd,
-        change: response.data.bitcoin.usd_24h_change
-      },
-      'ETH/USDT': {
-        price: response.data.ethereum.usd,
-        change: response.data.ethereum.usd_24h_change
-      },
-      'SOL/USDT': {
-        price: response.data.solana.usd,
-        change: response.data.solana.usd_24h_change
-      },
-      'ADA/USDT': {
-        price: response.data.cardano.usd,
-        change: response.data.cardano.usd_24h_change
-      },
-      'XRP/USDT': {
-        price: response.data.ripple.usd,
-        change: response.data.ripple.usd_24h_change
-      },
-      'BNB/USDT': {
-        price: response.data.binancecoin.usd,
-        change: response.data.binancecoin.usd_24h_change
-      }
-    }
-
-    marketDataCache = transformedData
-    lastFetch = now
-
-    res.json(transformedData)
+    
+    res.json(marketData)
   } catch (error) {
     console.error('Error fetching market data:', error)
-    
-    // Return cached data or fallback data if API fails
-    if (Object.keys(marketDataCache).length > 0) {
-      res.json(marketDataCache)
-    } else {
-      res.json({
-        'BTC/USDT': { price: 68355, change: 1.2 },
-        'ETH/USDT': { price: 3210, change: -0.4 },
-        'SOL/USDT': { price: 182.4, change: 2.1 },
-        'XRP/USDT': { price: 0.62, change: 0.7 },
-        'BNB/USDT': { price: 598.3, change: 0.9 },
-        'ADA/USDT': { price: 0.52, change: -0.3 }
-      })
-    }
+    res.json(marketService.getFallbackData())
   }
 })
 
@@ -84,43 +25,182 @@ router.get('/prices', async (req, res) => {
 router.get('/chart/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params
-    const { timeframe = '7' } = req.query
+    const { timeframe = '7', indicators } = req.query
 
-    const coinIds = {
-      'BTC': 'bitcoin',
-      'ETH': 'ethereum',
-      'SOL': 'solana',
-      'ADA': 'cardano',
-      'XRP': 'ripple',
-      'BNB': 'binancecoin'
+    const historicalData = await marketService.getHistoricalData(symbol, timeframe)
+    
+    const response = { ohlcv: historicalData }
+    
+    // Add technical indicators if requested
+    if (indicators) {
+      const indicatorList = indicators.split(',')
+      response.indicators = calculateTechnicalIndicators(historicalData, indicatorList)
     }
 
-    const coinId = coinIds[symbol]
-    if (!coinId) {
-      return res.status(400).json({ error: 'Invalid symbol' })
-    }
-
-    const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`, {
-      params: {
-        vs_currency: 'usd',
-        days: timeframe
-      }
-    })
-
-    res.json(response.data.prices)
+    res.json(response)
   } catch (error) {
     console.error('Error fetching chart data:', error)
-    
-    // Return mock data if API fails
-    const mockData = []
-    for (let i = 0; i < 7; i++) {
-      mockData.push([
-        Date.now() - (6 - i) * 24 * 60 * 60 * 1000,
-        40000 + Math.random() * 5000
-      ])
-    }
-    res.json(mockData)
+    res.status(500).json({ error: 'Failed to fetch chart data' })
   }
 })
+
+// Get market overview/stats
+router.get('/overview', async (req, res) => {
+  try {
+    const marketData = marketService.getCurrentData()
+    
+    const overview = {
+      totalMarketCap: Object.values(marketData).reduce((sum, coin) => sum + (coin.marketCap || 0), 0),
+      total24hVolume: Object.values(marketData).reduce((sum, coin) => sum + (coin.volume || 0), 0),
+      btcDominance: 45.2, // This would be calculated from real data
+      activeCoins: Object.keys(marketData).length,
+      markets: 15420,
+      marketCapChange24h: 2.34
+    }
+    
+    res.json(overview)
+  } catch (error) {
+    console.error('Error fetching market overview:', error)
+    res.status(500).json({ error: 'Failed to fetch market overview' })
+  }
+})
+
+// Search for cryptocurrencies
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query
+    const marketData = marketService.getCurrentData()
+    
+    const results = Object.entries(marketData)
+      .filter(([pair]) => {
+        const [symbol] = pair.split('/')
+        return symbol.toLowerCase().includes(q.toLowerCase())
+      })
+      .map(([pair, data]) => {
+        const [symbol] = pair.split('/')
+        return {
+          symbol,
+          name: getFullName(symbol),
+          price: data.price,
+          change: data.change
+        }
+      })
+    
+    res.json(results)
+  } catch (error) {
+    console.error('Error searching cryptocurrencies:', error)
+    res.status(500).json({ error: 'Search failed' })
+  }
+})
+
+function getFullName(symbol) {
+  const names = {
+    'BTC': 'Bitcoin',
+    'ETH': 'Ethereum',
+    'SOL': 'Solana',
+    'ADA': 'Cardano',
+    'XRP': 'Ripple',
+    'BNB': 'Binance Coin',
+    'MATIC': 'Polygon',
+    'DOT': 'Polkadot',
+    'LINK': 'Chainlink',
+    'UNI': 'Uniswap'
+  }
+  return names[symbol] || symbol
+}
+
+function calculateTechnicalIndicators(data, indicators) {
+  const prices = data.map(d => d.close)
+  const result = {}
+  
+  if (indicators.includes('sma')) {
+    result.sma = calculateSMA(prices, 20)
+  }
+  
+  if (indicators.includes('ema')) {
+    result.ema = calculateEMA(prices, 20)
+  }
+  
+  if (indicators.includes('rsi')) {
+    result.rsi = calculateRSI(prices, 14)
+  }
+  
+  if (indicators.includes('macd')) {
+    result.macd = calculateMACD(prices)
+  }
+  
+  if (indicators.includes('bollinger')) {
+    result.bollinger = calculateBollingerBands(prices, 20)
+  }
+  
+  return result
+}
+
+function calculateSMA(prices, period) {
+  const sma = []
+  for (let i = period - 1; i < prices.length; i++) {
+    const sum = prices.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0)
+    sma.push(sum / period)
+  }
+  return sma
+}
+
+function calculateEMA(prices, period) {
+  const ema = []
+  const multiplier = 2 / (period + 1)
+  ema[0] = prices[0]
+
+  for (let i = 1; i < prices.length; i++) {
+    ema[i] = (prices[i] - ema[i - 1]) * multiplier + ema[i - 1]
+  }
+  return ema
+}
+
+function calculateRSI(prices, period) {
+  const rsi = []
+  const gains = []
+  const losses = []
+
+  for (let i = 1; i < prices.length; i++) {
+    const change = prices[i] - prices[i - 1]
+    gains.push(change > 0 ? change : 0)
+    losses.push(change < 0 ? Math.abs(change) : 0)
+  }
+
+  for (let i = period - 1; i < gains.length; i++) {
+    const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period
+    const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period
+    const rs = avgGain / avgLoss
+    rsi.push(100 - (100 / (1 + rs)))
+  }
+  return rsi
+}
+
+function calculateMACD(prices) {
+  const ema12 = calculateEMA(prices, 12)
+  const ema26 = calculateEMA(prices, 26)
+  const macdLine = ema12.map((val, i) => val - ema26[i])
+  const signalLine = calculateEMA(macdLine, 9)
+  const histogram = macdLine.map((val, i) => val - signalLine[i])
+
+  return { macdLine, signalLine, histogram }
+}
+
+function calculateBollingerBands(prices, period) {
+  const sma = calculateSMA(prices, period)
+  const bands = { upper: [], middle: sma, lower: [] }
+
+  for (let i = period - 1; i < prices.length; i++) {
+    const slice = prices.slice(i - period + 1, i + 1)
+    const mean = slice.reduce((a, b) => a + b, 0) / period
+    const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period
+    const stdDev = Math.sqrt(variance)
+
+    bands.upper.push(sma[i - period + 1] + (stdDev * 2))
+    bands.lower.push(sma[i - period + 1] - (stdDev * 2))
+  }
+
+  return bands
+}
 
 module.exports = router

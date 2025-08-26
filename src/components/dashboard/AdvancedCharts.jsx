@@ -10,7 +10,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  TimeScale
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
 import axios from '../../utils/axios'
@@ -20,9 +21,11 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
+  Filler,
   TimeScale
 )
 

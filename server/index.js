@@ -15,6 +15,10 @@ const Admin = require('./models/Admin')
 const News = require('./models/News')
 const Announcement = require('./models/Announcement')
 
+// Import services
+const marketService = require('./services/marketService')
+const websocketService = require('./services/websocketService')
+
 dotenv.config()
 
 const app = express()
@@ -40,10 +44,9 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cryptotradingpro', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://admin:cryptotrade123@cluster0.mongodb.net/cryptotrade?retryWrites=true&w=majority'
+
+mongoose.connect(MONGODB_URI)
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err))
 
@@ -53,8 +56,9 @@ app.use('/api/admin', adminRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/market', marketRouter)
 app.use('/api/news', newsRouter)
-app.use('/api/users/trading-bots', require('./routes/trading-bots'))
-app.use('/api/users/competitions', require('./routes/competitions'))
+app.use('/api/portfolio', require('./routes/portfolio'))
+app.use('/api/trading-bots', require('./routes/trading-bots'))
+app.use('/api/competitions', require('./routes/competitions'))
 
 
 // Admin-only middleware
