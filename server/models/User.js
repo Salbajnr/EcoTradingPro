@@ -43,6 +43,29 @@ const userSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now },
     status: { type: String, default: 'completed' }
   }],
+  orders: [{
+    id: String,
+    type: { type: String, enum: ['buy', 'sell'] },
+    asset: String,
+    amount: Number,
+    price: Number,
+    quantity: Number,
+    orderType: { type: String, enum: ['market', 'limit', 'stop-loss', 'stop-limit'] },
+    timestamp: { type: Date, default: Date.now },
+    status: { type: String, enum: ['pending', 'completed', 'cancelled', 'partial'], default: 'pending' }
+  }],
+  watchlist: [{
+    asset: String,
+    addedAt: { type: Date, default: Date.now }
+  }],
+  priceAlerts: [{
+    id: String,
+    asset: String,
+    price: Number,
+    type: { type: String, enum: ['above', 'below'] },
+    status: { type: String, enum: ['active', 'triggered'], default: 'active' },
+    createdAt: { type: Date, default: Date.now }
+  }],
   isActive: {
     type: Boolean,
     default: true
