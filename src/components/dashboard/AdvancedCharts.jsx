@@ -1,16 +1,16 @@
-
 import React, { useState, useEffect } from 'react'
-import { Line, Candlestick } from 'react-chartjs-2'
+import { Line, Bar } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
-  TimeScale
+  Filler
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
 import axios from '../../utils/axios'
@@ -73,7 +73,7 @@ function AdvancedCharts() {
       const response = await axios.get(`/api/market/chart/${selectedAsset}`, {
         params: { timeframe, indicators: Object.keys(indicators).filter(k => indicators[k]) }
       })
-      
+
       setChartData(response.data.ohlcv)
       setTechnicalData(response.data.indicators || {})
     } catch (error) {
@@ -88,18 +88,18 @@ function AdvancedCharts() {
     const data = []
     const basePrice = 50000
     let currentPrice = basePrice
-    
+
     for (let i = 0; i < 100; i++) {
       const timestamp = new Date(Date.now() - (99 - i) * 24 * 60 * 60 * 1000)
       const variation = (Math.random() - 0.5) * 0.1
       currentPrice = currentPrice * (1 + variation)
-      
+
       const open = currentPrice
       const high = open * (1 + Math.random() * 0.05)
       const low = open * (1 - Math.random() * 0.05)
       const close = low + Math.random() * (high - low)
       const volume = Math.random() * 1000000
-      
+
       data.push({
         timestamp: timestamp.getTime(),
         open,
@@ -109,34 +109,34 @@ function AdvancedCharts() {
         volume
       })
     }
-    
+
     setChartData(data)
     generateTechnicalIndicators(data)
   }
 
   const generateTechnicalIndicators = (data) => {
     const technical = {}
-    
+
     if (indicators.sma) {
       technical.sma = calculateSMA(data.map(d => d.close), 20)
     }
-    
+
     if (indicators.ema) {
       technical.ema = calculateEMA(data.map(d => d.close), 20)
     }
-    
+
     if (indicators.rsi) {
       technical.rsi = calculateRSI(data.map(d => d.close), 14)
     }
-    
+
     if (indicators.macd) {
       technical.macd = calculateMACD(data.map(d => d.close))
     }
-    
+
     if (indicators.bollinger) {
       technical.bollinger = calculateBollingerBands(data.map(d => d.close), 20)
     }
-    
+
     setTechnicalData(technical)
   }
 
@@ -153,7 +153,7 @@ function AdvancedCharts() {
     const ema = []
     const multiplier = 2 / (period + 1)
     ema[0] = prices[0]
-    
+
     for (let i = 1; i < prices.length; i++) {
       ema[i] = (prices[i] - ema[i - 1]) * multiplier + ema[i - 1]
     }
@@ -164,13 +164,13 @@ function AdvancedCharts() {
     const rsi = []
     const gains = []
     const losses = []
-    
+
     for (let i = 1; i < prices.length; i++) {
       const change = prices[i] - prices[i - 1]
       gains.push(change > 0 ? change : 0)
       losses.push(change < 0 ? Math.abs(change) : 0)
     }
-    
+
     for (let i = period - 1; i < gains.length; i++) {
       const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period
       const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period
@@ -186,24 +186,24 @@ function AdvancedCharts() {
     const macdLine = ema12.map((val, i) => val - ema26[i])
     const signalLine = calculateEMA(macdLine, 9)
     const histogram = macdLine.map((val, i) => val - signalLine[i])
-    
+
     return { macdLine, signalLine, histogram }
   }
 
   const calculateBollingerBands = (prices, period) => {
     const sma = calculateSMA(prices, period)
     const bands = { upper: [], middle: sma, lower: [] }
-    
+
     for (let i = period - 1; i < prices.length; i++) {
       const slice = prices.slice(i - period + 1, i + 1)
       const mean = slice.reduce((a, b) => a + b, 0) / period
-      const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period
+      const variance = slice.slice(i - period + 1, i + 1).reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period
       const stdDev = Math.sqrt(variance)
-      
+
       bands.upper.push(sma[i - period + 1] + (stdDev * 2))
       bands.lower.push(sma[i - period + 1] - (stdDev * 2))
     }
-    
+
     return bands
   }
 
@@ -213,7 +213,7 @@ function AdvancedCharts() {
       [indicator]: !indicators[indicator]
     }
     setIndicators(newIndicators)
-    
+
     if (chartData) {
       generateTechnicalIndicators(chartData)
     }
@@ -324,7 +324,7 @@ function AdvancedCharts() {
             <h2 className="text-2xl font-bold">Advanced Charts</h2>
             <p className="text-gray-600 dark:text-gray-300">Professional trading analysis tools</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             <select
               value={selectedAsset}
@@ -335,7 +335,7 @@ function AdvancedCharts() {
                 <option key={asset} value={asset}>{asset}/USDT</option>
               ))}
             </select>
-            
+
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
@@ -345,7 +345,7 @@ function AdvancedCharts() {
                 <option key={tf.value} value={tf.value}>{tf.label}</option>
               ))}
             </select>
-            
+
             <select
               value={chartType}
               onChange={(e) => setChartType(e.target.value)}
@@ -484,7 +484,7 @@ function AdvancedCharts() {
                 </button>
               ))}
             </div>
-            
+
             {activeDrawing && (
               <div className="mt-4 p-3 bg-brand-100 dark:bg-brand-900/20 rounded-lg">
                 <p className="text-sm text-brand-700 dark:text-brand-400">

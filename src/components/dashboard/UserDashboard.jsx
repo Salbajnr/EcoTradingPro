@@ -14,6 +14,8 @@ import SocialTrading from './SocialTrading'
 import AdvancedCharts from './AdvancedCharts'
 import TradingCompetitions from './TradingCompetitions'
 import APIAccess from './APIAccess'
+import RiskManagement from './RiskManagement'
+import PerformanceAnalytics from './PerformanceAnalytics'
 
 function UserDashboard() {
   const { user, logout } = useAuth()
@@ -465,6 +467,26 @@ function DashboardHome() {
         >
           API Access
         </button>
+        <button
+          onClick={() => setActiveView('risk-management')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'risk-management'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Risk Management
+        </button>
+        <button
+          onClick={() => setActiveView('performance')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'performance'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Performance
+        </button>
       </div>
 
       {/* Render content based on activeView */}
@@ -727,6 +749,8 @@ function DashboardHome() {
       {activeView === 'order-history' && <OrderHistory />}
       {activeView === 'watchlist' && <Watchlist />}
       {activeView === 'api-access' && <APIAccess />}
+      {activeView === 'risk-management' && <RiskManagement />}
+      {activeView === 'performance' && <PerformanceAnalytics />}
     </>
   )
 }
