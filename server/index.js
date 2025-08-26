@@ -1,6 +1,8 @@
 const express = require('express')
-const mongoose = require('mongoose')
+const http = require('http')
+const socketIo = require('socket.io')
 const cors = require('cors')
+const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const path = require('path')
 const { router: authRouter, authenticateToken } = require('./routes/auth')
@@ -16,6 +18,15 @@ const Announcement = require('./models/Announcement')
 dotenv.config()
 
 const app = express()
+const server = http.createServer(app)
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production'
+      ? process.env.FRONTEND_URL
+      : ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+  }
+})
 const PORT = process.env.PORT || 5000
 
 // Middleware
@@ -88,6 +99,12 @@ app.put('/api/admin/users/:id/balance', authenticateToken, requireAdmin, async (
       return res.status(404).json({ error: 'User not found' })
     }
 
+    // Send notification to user about balance update
+    io.to(`user-${user._id}`).emit('balance-update', {
+      message: `Your balance has been updated to ${user.balance.toFixed(2)}.`,
+      newBalance: user.balance
+    })
+
     res.json(user)
   } catch (error) {
     console.error('Error updating balance:', error)
@@ -108,6 +125,12 @@ app.put('/api/admin/users/:id/status', authenticateToken, requireAdmin, async (r
     if (!user) {
       return res.status(404).json({ error: 'User not found' })
     }
+
+    // Send notification to user about status change
+    io.to(`user-${user._id}`).emit('status-update', {
+      message: `Your account status has been updated to ${user.isActive ? 'Active' : 'Inactive'}.`,
+      isActive: user.isActive
+    })
 
     res.json(user)
   } catch (error) {
@@ -239,6 +262,85 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' })
 })
 
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id)
+
+  // Join user to their personal room for notifications
+  socket.on('join-user-room', (userId) => {
+    socket.join(`user-${userId}`)
+    console.log(`User ${userId} joined their room`)
+  })
+
+  // Join market data room
+  socket.on('join-market', () => {
+    socket.join('market-data')
+    console.log('User joined market data room')
+  })
+
+  // Leave market data room
+  socket.on('leave-market', () => {
+    socket.leave('market-data')
+    console.log('User left market data room')
+  })
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id)
+  })
+})
+
+// Simulate real-time market data updates
+const marketDataInterval = setInterval(() => {
+  const coins = ['bitcoin', 'ethereum', 'cardano', 'polkadot', 'chainlink', 'litecoin', 'stellar', 'dogecoin']
+
+  coins.forEach(coin => {
+    // Simulate price changes (-5% to +5%)
+    const changePercent = (Math.random() - 0.5) * 10
+    const basePrice = getBasePriceForCoin(coin)
+    const newPrice = basePrice * (1 + changePercent / 100)
+
+    const marketUpdate = {
+      symbol: coin,
+      price: newPrice,
+      change24h: changePercent,
+      timestamp: new Date()
+    }
+
+    // Emit to all users in market-data room
+    io.to('market-data').emit('price-update', marketUpdate)
+  })
+}, 3000) // Update every 3 seconds
+
+// Helper function to get base prices
+function getBasePriceForCoin(coin) {
+  const basePrices = {
+    bitcoin: 45000,
+    ethereum: 3000,
+    cardano: 0.5,
+    polkadot: 25,
+    chainlink: 15,
+    litecoin: 150,
+    stellar: 0.3,
+    dogecoin: 0.08
+  }
+  return basePrices[coin] || 100
+}
+
+// Export for use in other modules
+app.locals.io = io
+// app.locals.sendNotification = sendNotification // This function is not defined in the provided snippet. If needed, it should be implemented.
+
+// Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT}`)
+})
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully')
+  clearInterval(marketDataInterval)
+  server.close(() => {
+    console.log('Server closed')
+    process.exit(0)
+  })
 })

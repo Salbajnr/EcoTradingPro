@@ -5,6 +5,8 @@ import { useTheme } from '../../contexts/ThemeContext'
 import Chart from 'chart.js/auto'
 import Portfolio from './Portfolio'
 import Trading from './Trading'
+import Analytics from './Analytics'
+import Notifications from './Notifications'
 
 function UserDashboard() {
   const { user, logout } = useAuth()
@@ -189,13 +191,17 @@ function UserDashboard() {
               <i className="fas fa-exchange-alt text-lg"></i>
               {!sidebarCollapsed && <span>Trade</span>}
             </Link>
+            <Link to="/dashboard/analytics" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-chart-bar text-lg"></i>
+              {!sidebarCollapsed && <span>Analytics</span>}
+            </Link>
+            <Link to="/dashboard/notifications" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-bell text-lg"></i>
+              {!sidebarCollapsed && <span>Notifications</span>}
+            </Link>
             <Link to="/dashboard/news" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-newspaper text-lg"></i>
               {!sidebarCollapsed && <span>News</span>}
-            </Link>
-            <Link to="/dashboard/markets" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
-              <i className="fas fa-chart-bar text-lg"></i>
-              {!sidebarCollapsed && <span>Markets</span>}
             </Link>
             <Link to="/dashboard/transactions" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-history text-lg"></i>
@@ -263,6 +269,8 @@ function UserDashboard() {
               <Route path="/" element={<DashboardHome />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/trading" element={<Trading />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/news" element={<div>News Management System coming soon...</div>} />
               <Route path="/markets" element={<div>Markets coming soon...</div>} />
               <Route path="/transactions" element={<div>Transactions coming soon...</div>} />

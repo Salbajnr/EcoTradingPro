@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { WebSocketProvider } from './contexts/WebSocketContext'
 import LandingPage from './components/LandingPage'
 import UserLogin from './components/auth/UserLogin'
 import UserRegister from './components/auth/UserRegister'
@@ -13,36 +14,38 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth/login" element={<UserLogin />} />
-            <Route path="/auth/register" element={<UserRegister />} />
-            <Route path="/auth/admin" element={<AdminLogin />} />
+        <WebSocketProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth/login" element={<UserLogin />} />
+              <Route path="/auth/register" element={<UserRegister />} />
+              <Route path="/auth/admin" element={<AdminLogin />} />
 
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard/*" 
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              } 
-            />
+              {/* Protected Routes */}
+              <Route
+                path="/dashboard/*"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <div className="min-h-screen bg-white dark:bg-[#0A0F1A] text-gray-900 dark:text-gray-100 p-8">
-                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                    <p>Welcome to the admin panel!</p>
-                  </div>
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </Router>
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <div className="min-h-screen bg-white dark:bg-[#0A0F1A] text-gray-900 dark:text-gray-100 p-8">
+                      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                      <p>Welcome to the admin panel!</p>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </WebSocketProvider>
       </AuthProvider>
     </ThemeProvider>
   )
