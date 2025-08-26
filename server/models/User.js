@@ -66,6 +66,53 @@ const userSchema = new mongoose.Schema({
     status: { type: String, enum: ['active', 'triggered'], default: 'active' },
     createdAt: { type: Date, default: Date.now }
   }],
+  tradingBots: [{
+    id: String,
+    name: String,
+    strategy: { type: String, enum: ['grid', 'dca', 'rsi', 'macd', 'momentum'] },
+    asset: String,
+    investment: Number,
+    config: Object,
+    status: { type: String, enum: ['active', 'paused', 'stopped'], default: 'active' },
+    profit: { type: Number, default: 0 },
+    trades: { type: Number, default: 0 },
+    performance: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  competitions: [{
+    competitionId: String,
+    joinedAt: { type: Date, default: Date.now },
+    startingBalance: Number,
+    currentBalance: Number,
+    trades: [Object]
+  }],
+  socialTrading: {
+    following: [String],
+    followers: [String],
+    copyTrades: [{
+      traderId: String,
+      amount: Number,
+      percentage: Number,
+      status: { type: String, enum: ['active', 'paused'], default: 'active' },
+      startedAt: { type: Date, default: Date.now }
+    }]
+  },
+  apiKeys: [{
+    id: String,
+    name: String,
+    keyPrefix: String,
+    hashedSecret: String,
+    permissions: {
+      read: { type: Boolean, default: true },
+      trade: { type: Boolean, default: false },
+      withdraw: { type: Boolean, default: false }
+    },
+    lastUsed: Date,
+    usageCount: { type: Number, default: 0 },
+    ipWhitelist: [String],
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    createdAt: { type: Date, default: Date.now }
+  }],
   isActive: {
     type: Boolean,
     default: true

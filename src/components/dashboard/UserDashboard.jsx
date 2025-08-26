@@ -9,6 +9,11 @@ import Analytics from './Analytics'
 import Notifications from './Notifications'
 import OrderHistory from './OrderHistory' // Assuming these components exist
 import Watchlist from './Watchlist' // Assuming these components exist
+import TradingBots from './TradingBots'
+import SocialTrading from './SocialTrading'
+import AdvancedCharts from './AdvancedCharts'
+import TradingCompetitions from './TradingCompetitions'
+import APIAccess from './APIAccess'
 
 function UserDashboard() {
   const { user, logout } = useAuth()
@@ -200,6 +205,22 @@ function UserDashboard() {
               <i className="fas fa-chart-bar text-lg"></i>
               {!sidebarCollapsed && <span>Analytics</span>}
             </Link>
+            <Link to="/dashboard/advanced-charts" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-chart-line text-lg"></i>
+              {!sidebarCollapsed && <span>Advanced Charts</span>}
+            </Link>
+            <Link to="/dashboard/trading-bots" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-robot text-lg"></i>
+              {!sidebarCollapsed && <span>Trading Bots</span>}
+            </Link>
+            <Link to="/dashboard/social-trading" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-users text-lg"></i>
+              {!sidebarCollapsed && <span>Social Trading</span>}
+            </Link>
+            <Link to="/dashboard/competitions" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-trophy text-lg"></i>
+              {!sidebarCollapsed && <span>Competitions</span>}
+            </Link>
             <Link to="/dashboard/notifications" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-bell text-lg"></i>
               {!sidebarCollapsed && <span>Notifications</span>}
@@ -220,6 +241,10 @@ function UserDashboard() {
             <Link to="/dashboard/watchlist" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
               <i className="fas fa-eye text-lg"></i>
               {!sidebarCollapsed && <span>Watchlist</span>}
+            </Link>
+            <Link to="/dashboard/api-access" className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 mb-2">
+              <i className="fas fa-cog text-lg"></i>
+              {!sidebarCollapsed && <span>API Access</span>}
             </Link>
           </nav>
         </div>
@@ -293,6 +318,11 @@ function UserDashboard() {
               {/* New Routes */}
               <Route path="/order-history" element={<OrderHistory />} />
               <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/advanced-charts" element={<AdvancedCharts />} />
+              <Route path="/trading-bots" element={<TradingBots />} />
+              <Route path="/social-trading" element={<SocialTrading />} />
+              <Route path="/competitions" element={<TradingCompetitions />} />
+              <Route path="/api-access" element={<APIAccess />} />
             </Routes>
           </main>
 
@@ -334,16 +364,16 @@ function DashboardHome() {
 
   // Placeholder for unread count, assuming it comes from notifications system
   const unreadCount = 3;
-  const [activeTab, setActiveTab] = useState('analytics'); // State for the tab selection within dashboard home content
+  const [activeView, setActiveView] = useState('analytics'); // State for the tab selection within dashboard home content
 
   return (
     <>
       {/* Tabs for different dashboard sections */}
       <div className="flex gap-4 mb-8 overflow-x-auto">
         <button
-          onClick={() => setActiveTab('analytics')}
+          onClick={() => setActiveView('analytics')}
           className={`px-4 py-2 rounded-lg transition ${
-            activeTab === 'analytics'
+            activeView === 'analytics'
               ? 'bg-brand-500 text-white'
               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
@@ -351,9 +381,49 @@ function DashboardHome() {
           Analytics
         </button>
         <button
-          onClick={() => setActiveTab('history')}
+          onClick={() => setActiveView('advanced-charts')}
           className={`px-4 py-2 rounded-lg transition ${
-            activeTab === 'history'
+            activeView === 'advanced-charts'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Advanced Charts
+        </button>
+        <button
+          onClick={() => setActiveView('trading-bots')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'trading-bots'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Trading Bots
+        </button>
+        <button
+          onClick={() => setActiveView('social-trading')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'social-trading'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Social Trading
+        </button>
+        <button
+          onClick={() => setActiveView('competitions')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'competitions'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          Competitions
+        </button>
+        <button
+          onClick={() => setActiveView('history')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'history'
               ? 'bg-brand-500 text-white'
               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
@@ -361,9 +431,9 @@ function DashboardHome() {
           History
         </button>
         <button
-          onClick={() => setActiveTab('watchlist')}
+          onClick={() => setActiveView('watchlist')}
           className={`px-4 py-2 rounded-lg transition ${
-            activeTab === 'watchlist'
+            activeView === 'watchlist'
               ? 'bg-brand-500 text-white'
               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
@@ -371,9 +441,9 @@ function DashboardHome() {
           Watchlist
         </button>
         <button
-          onClick={() => setActiveTab('notifications')}
+          onClick={() => setActiveView('notifications')}
           className={`px-4 py-2 rounded-lg transition relative ${
-            activeTab === 'notifications'
+            activeView === 'notifications'
               ? 'bg-brand-500 text-white'
               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
@@ -385,10 +455,20 @@ function DashboardHome() {
             </span>
           )}
         </button>
+        <button
+          onClick={() => setActiveView('api-access')}
+          className={`px-4 py-2 rounded-lg transition ${
+            activeView === 'api-access'
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          API Access
+        </button>
       </div>
 
-      {/* Render content based on activeTab */}
-      {activeTab === 'analytics' && (
+      {/* Render content based on activeView */}
+      {activeView === 'analytics' && (
         <>
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -639,9 +719,14 @@ function DashboardHome() {
           </div>
         </>
       )}
-      {activeTab === 'history' && <OrderHistory />}
-      {activeTab === 'watchlist' && <Watchlist />}
-      {activeTab === 'notifications' && <Notifications />}
+      {activeView === 'advanced-charts' && <AdvancedCharts />}
+      {activeView === 'trading-bots' && <TradingBots />}
+      {activeView === 'social-trading' && <SocialTrading />}
+      {activeView === 'competitions' && <TradingCompetitions />}
+      {activeView === 'notifications' && <Notifications />}
+      {activeView === 'order-history' && <OrderHistory />}
+      {activeView === 'watchlist' && <Watchlist />}
+      {activeView === 'api-access' && <APIAccess />}
     </>
   )
 }

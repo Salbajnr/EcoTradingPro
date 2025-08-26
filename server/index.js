@@ -53,6 +53,9 @@ app.use('/api/admin', adminRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/market', marketRouter)
 app.use('/api/news', newsRouter)
+app.use('/api/users/trading-bots', require('./routes/trading-bots'))
+app.use('/api/users/competitions', require('./routes/competitions'))
+
 
 // Admin-only middleware
 const requireAdmin = (req, res, next) => {
